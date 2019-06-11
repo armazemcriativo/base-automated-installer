@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+function base() {
+    # 0. The project name
+    project=$1
+
+    # 1. Download latest version of WordPress into Sites folder
+    cd ~/Sites
+    wget https://wordpress.org/latest.tar.gz
+    tar -xvzf latest.tar.gz
+
+    # 2. Rename directory to given project name
+    mv wordpress $project
+    rm latest.tar.gz
+    cd ~/Sites/$project
+
+    # 3. Remove unnecessary files
+    rm license.txt readme.html
+
+    # 4. Create .gitignore file
+    echo '.DS_Store
+[Tt]humbs.db
+.Trashes
+.log
+.env.php
+sitemap.xml
+wp-content/backup
+wp-content/cache
+wp-content/upgrade
+wp-content/uploads
+wp-content/blogs.dir
+wp-content/backup-db
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/themes/*/.sass-cache
+wp-content/themes/*/node_modules' > .gitignore
+
+    # 5. Plugins
+    ## 5.1. Remove unnecessary plugins
+    cd wp-content/plugins
+    rm -rf */ hello.php
+
+    ## 5.2. Download useful plugins
+    git clone https://github.com/wp-premium/advanced-custom-fields-pro.git
+
+    wget https://downloads.wordpress.org/plugin/regenerate-thumbnails.zip
+    wget https://downloads.wordpress.org/plugin/simple-history.2.20.zip
+    wget https://downloads.wordpress.org/plugin/wordpress-seo.7.3.zip
+
+    tar -xvzf regenerate-thumbnails.zip
+    tar -xvzf simple-history.2.20.zip
+    tar -xvzf wordpress-seo.7.3.zip
+    rm *.zip
+
+    # 6. Themes
+    ## 6.1. Remove unnecessary themes
+    cd ../themes
+    rm -rf */
+
+    ## 6.2. Clone Base
+    git clone https://github.com/armazemcriativo/base
+    mv base $project
+
+    ## 6.3. Install Base submodules
+    cd $project
+    git submodule init
+    git submodule update
+
+    ## 6.4. Remove unnecessary stuff
+    rm -rf .git .gitattributes .gitignore .gitmodules README.md CHANGELOG.md assets/styles/vendor/simple-grid/.* assets/styles/vendor/simple-grid/README.md
+
+    # 7. Install all npm dependencies
+    npm install
+}
+
+base $1
